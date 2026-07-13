@@ -1,0 +1,34 @@
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+**/dist/
+**/build/
+
+# Local Environment variables
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.*
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories
+.vscode/
+.idea/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Server local uploads content (ignore actual uploaded media, keep directory structure)
+server/public/uploads/*
+!server/public/uploads/.gitkeep

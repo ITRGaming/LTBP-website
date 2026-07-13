@@ -1,0 +1,110 @@
+export const products = [
+  {
+    id: 1,
+    title: "The Heirloom Drawer Set",
+    category: "Drawer Organizers",
+    size: "Classic",
+    price: 185.00,
+    image: "/assets/images/product-drawer.jpg",
+    description: "Reinforced silk-lined organizers designed for the most delicate of garments and keepsakes.",
+    colors: ["#B8D8BA", "#E8DCC4", "#C9B1D0", "#F5C2C7", "#FDFBFF"],
+    colorsNames: ["Sage Mist", "Linen Beige", "Soft Lavender", "Blush Rose", "Pure Ivory"],
+    badge: "New Arrival"
+  },
+  {
+    id: 2,
+    title: "Quilted Velvet Jewel Case",
+    category: "Jewelry Cases",
+    size: "Classic",
+    price: 120.00,
+    image: "/assets/images/product-velvet.jpg",
+    description: "A haven for your gems, featuring custom-molded compartments and tarnish-resistant lining.",
+    colors: ["#C9B1D0", "#F5C2C7"],
+    colorsNames: ["Soft Lavender", "Blush Rose"],
+    badge: "Best Seller"
+  },
+  {
+    id: 3,
+    title: "Atelier Wardrobe Bins",
+    category: "Wardrobe Solutions",
+    size: "Grand",
+    price: 95.00,
+    image: "/assets/images/product-wardrobe.jpg",
+    description: "Linen-weave bins with bespoke embroidery options for a truly personalized closet space.",
+    colors: ["#FDFBFF", "#E8DCC4"],
+    colorsNames: ["Pure Ivory", "Linen Beige"],
+    badge: null
+  },
+  {
+    id: 4,
+    title: "Blush Satin Travel Roll",
+    category: "Travel Essentials",
+    size: "Petite",
+    price: 75.00,
+    image: "/assets/images/product-satin.jpg",
+    description: "Compact yet capacious, our travel roll keeps your treasures secure and tangle-free on every journey.",
+    colors: ["#F5C2C7"],
+    colorsNames: ["Blush Rose"],
+    badge: null
+  },
+  {
+    id: 5,
+    title: "Sage Embroidery Dividers",
+    category: "Drawer Organizers",
+    size: "Classic",
+    price: 145.00,
+    image: "/assets/images/product-sage.jpg",
+    description: "Transform any drawer into an organized sanctuary with our hand-embroidered adjustable dividers.",
+    colors: ["#B8D8BA"],
+    colorsNames: ["Sage Mist"],
+    badge: null
+  },
+  {
+    id: 6,
+    title: "The Monogram Garment Suite",
+    category: "Wardrobe Solutions",
+    size: "Grand",
+    price: 210.00,
+    image: "/assets/images/product-monogram.jpg",
+    description: "Protect your finest attire in breathable, ivory cotton bags with your personal monogram in lavender thread.",
+    colors: ["#FDFBFF", "#C9B1D0"],
+    colorsNames: ["Pure Ivory", "Soft Lavender"],
+    badge: "Limited Edition"
+  },
+  {
+    id: 7,
+    title: "Premium Storage Boxes",
+    category: "Home Storage",
+    size: "Grand",
+    price: 165.00,
+    image: "/assets/images/product-storage.jpg",
+    description: "Set of 4 handcrafted archival storage boxes in heritage colors with reinforced bases.",
+    colors: ["#E8DCC4", "#B8D8BA", "#C9B1D0"],
+    colorsNames: ["Linen Beige", "Sage Mist", "Soft Lavender"],
+    badge: "Popular Choice"
+  },
+  {
+    id: 8,
+    title: "Custom Diaper Pouches",
+    category: "Travel Essentials",
+    size: "Classic",
+    price: 65.00,
+    image: "/assets/images/product-diaper.jpg",
+    description: "Personalized soft cotton blend baby storage pouch with bespoke name embroidery.",
+    colors: ["#F5C2C7", "#C9B1D0"],
+    colorsNames: ["Blush Rose", "Soft Lavender"],
+    badge: "Bestseller"
+  },
+  {
+    id: 9,
+    title: "Vanity Roll-Ups",
+    category: "Vanity Organizers",
+    size: "Petite",
+    price: 85.00,
+    image: "/assets/images/product-roll.jpg",
+    description: "Archival quality travel-friendly rolling cosmetic case with tarnish-resistant brush slots.",
+    colors: ["#E3E2E6", "#F4DAFB"],
+    colorsNames: ["Linen Beige", "Pure Ivory"],
+    badge: null
+  }
+];

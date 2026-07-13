@@ -1,25 +1,51 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { products } from '../data/products';
+import { useSettings } from '../hooks/useSettings';
+import { useFeaturedProducts } from '../hooks/useProducts';
+import { useTestimonials } from '../hooks/useTestimonials';
+import ImageFallback from '../components/ImageFallback';
 
 function Home() {
   const navigate = useNavigate();
-
-  // Best Sellers (Premium Storage Boxes, Custom Diaper Pouches, Vanity Roll-Ups)
-  const bestSellers = products.filter(p => [7, 8, 9].includes(p.id));
+  const { data: settings, isLoading: isSettingsLoading } = useSettings();
+  const { data: featuredProducts, isLoading: isProductsLoading, error: productsError } = useFeaturedProducts();
+  const { data: testimonials, isLoading: isTestimonialsLoading } = useTestimonials();
 
   const handleCategoryClick = (category) => {
     navigate(`/products?category=${encodeURIComponent(category)}`);
   };
 
+  const isLoading = isSettingsLoading || isProductsLoading || isTestimonialsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-secondary border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-label-md tracking-wider uppercase text-on-surface-variant text-sm animate-pulse">
+            Loading Atelier...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Use featured products as bestSellers. If none, grab first 3 active products.
+  const displayProducts = featuredProducts || [];
+
+  // Filter or take first 3 testimonials
+  const homeTestimonials = testimonials?.slice(0, 3) || [];
+
+  const heroImage = settings?.heroImage?.url || "/assets/images/hero.jpg";
+  const businessName = settings?.businessName || "Lil' Threadz by Priya";
+
   return (
     <main className="mt-20">
-
       {/* Hero Section */}
       <section className="relative min-h-[85vh] flex items-center px-6 md:px-16 bg-surface-container-low overflow-hidden">
         <div className="absolute inset-0 z-0 flex justify-end">
           <div
             className="w-full md:w-3/5 h-full bg-cover bg-center"
-            style={{ backgroundImage: 'url("/assets/images/hero.jpg")' }}
+            style={{ backgroundImage: `url("${heroImage}")` }}
           ></div>
           {/* Overlay to fade details */}
           <div className="absolute inset-0 hero-overlay hidden md:block"></div>
@@ -34,7 +60,7 @@ function Home() {
             Artisanal Elegance for Your Organized Life
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant mb-10 leading-relaxed max-w-xl">
-            Customized fabric organizers, pouches, and travel essentials crafted with heritage and care. Bringing a sense of serenity to your daily rituals through tactile luxury.
+            {settings?.aboutText || "Customized fabric organizers, pouches, and travel essentials crafted with heritage and care. Bringing a sense of serenity to your daily rituals through tactile luxury."}
           </p>
           <div className="flex flex-wrap gap-4">
             <Link
@@ -139,7 +165,7 @@ function Home() {
       </section>
 
       {/* Best Sellers Section */}
-      <section class="px-[64px] py-[96px]">
+      <section className="px-[64px] py-[96px]">
         <div className="flex justify-between items-end mb-16">
           <div>
             <span className="font-label-md text-secondary uppercase tracking-[0.2em] block mb-4">
@@ -157,39 +183,57 @@ function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px]">
-          {bestSellers.map((product) => (
-            <div key={product.id} className="flex flex-col group">
-              <div className="aspect-square bg-surface-container rounded-xl overflow-hidden mb-6 relative">
-                <div
-                  className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
-                  style={{ backgroundImage: `url("${product.image}")` }}
-                ></div>
-                {product.badge && (
-                  <div className="absolute top-4 left-4 bg-surface-bright/90 backdrop-blur px-4 py-1 rounded-full text-label-md text-primary shadow-sm">
-                    {product.badge}
+        {displayProducts.length === 0 ? (
+          <div className="text-center py-16 bg-surface-container-low/30 rounded-2xl border border-outline-variant/10">
+            <span className="material-symbols-outlined text-4xl text-outline-variant mb-3">
+              inventory_2
+            </span>
+            <p className="font-body-md text-on-surface-variant">
+              No featured products available at the moment.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px]">
+            {displayProducts.map((product) => {
+              const mainImageUrl = product.images?.[0]?.url;
+              return (
+                <Link to={`/products/${product.slug}`} key={product._id} className="flex flex-col group cursor-pointer">
+                  <div className="aspect-square bg-surface-container rounded-xl overflow-hidden mb-6 relative">
+                    {mainImageUrl ? (
+                      <div
+                        className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500"
+                        style={{ backgroundImage: `url("${mainImageUrl}")` }}
+                      ></div>
+                    ) : (
+                      <ImageFallback className="w-full h-full" text={product.name} />
+                    )}
+                    {product.isFeatured && (
+                      <div className="absolute top-4 left-4 bg-surface-bright/90 backdrop-blur px-4 py-1 rounded-full text-label-md text-primary shadow-sm font-semibold">
+                        Best Seller
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <h4 className="font-headline-md text-headline-md text-primary">
-                {product.title}
-              </h4>
-              <p className="text-on-surface-variant mb-4 font-body-md">
-                {product.description}
-              </p>
-              <div className="flex gap-2">
-                {product.colors.map((color, colorIdx) => (
-                  <span
-                    key={colorIdx}
-                    className="w-6 h-6 rounded-full border border-black/10 ring-offset-2 ring-1 ring-transparent hover:ring-secondary transition-all"
-                    style={{ backgroundColor: color }}
-                    title={product.colorsNames ? product.colorsNames[colorIdx] : ''}
-                  ></span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+                  <h4 className="font-headline-md text-headline-md text-primary font-semibold">
+                    {product.name}
+                  </h4>
+                  <p className="text-on-surface-variant mb-4 font-body-md line-clamp-2">
+                    {product.shortDescription || product.description}
+                  </p>
+                  <div className="flex gap-2">
+                    {product.availableColors?.map((color, colorIdx) => (
+                      <span
+                        key={colorIdx}
+                        className="w-6 h-6 rounded-full border border-black/10 ring-offset-2 ring-1 ring-transparent hover:ring-secondary transition-all"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      ></span>
+                    ))}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Tailored / Process Section */}
@@ -254,57 +298,75 @@ function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px]">
-          {[
-            {
-              quote: "The quality of the quilting is unlike anything I've found in stores. It feels so protective and looks absolutely stunning in my closet.",
-              author: "Anjali R.",
-              role: "Custom Saree Bags",
-              color: "bg-soft-pink/30"
-            },
-            {
-              quote: "Ordered diaper pouches for my baby shower gifts and everyone was obsessed. The personalized embroidery was the perfect touch.",
-              author: "Sarah M.",
-              role: "Gifting Collection",
-              color: "bg-lavender/30"
-            },
-            {
-              quote: "The travel pouches have changed the way I pack. They keep my jewelry and delicate items safe and organized. A true investment.",
-              author: "Meera K.",
-              role: "Travel Essentials",
-              color: "bg-brand-sage/40"
-            }
-          ].map((test, index) => (
-            <div
-              key={index}
-              className="bg-surface-container-low p-10 rounded-xl border border-outline-variant/20 flex flex-col justify-between hover:shadow-lg transition-all"
-            >
-              <div>
-                <div className="flex text-secondary mb-6">
-                  {[...Array(5)].map((_, i) => (
-                    <span
-                      key={i}
-                      className="material-symbols-outlined text-[20px]"
-                      style={{ fontVariationSettings: '"FILL" 1' }}
-                    >
-                      star
-                    </span>
-                  ))}
+        {homeTestimonials.length === 0 ? (
+          <div className="text-center py-12 bg-surface-container-low/30 rounded-2xl border border-outline-variant/20">
+            <span className="material-symbols-outlined text-4xl text-outline-variant mb-3">
+              chat_bubble
+            </span>
+            <p className="font-body-md text-on-surface-variant">
+              No client reviews available at the moment.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px]">
+            {homeTestimonials.map((test, index) => {
+              const rating = test.rating || 5;
+              const sourceColors = {
+                'WhatsApp': 'bg-green-100/50 text-green-600',
+                'Instagram DM': 'bg-secondary-container/40 text-secondary',
+                'Instagram Story': 'bg-secondary-container/60 text-secondary',
+                'Text': 'bg-surface-container-high text-on-surface-variant'
+              };
+              const badgeColor = sourceColors[test.source] || 'bg-surface-container-high';
+              const avatarUrl = test.image?.url;
+
+              return (
+                <div
+                  key={test._id || index}
+                  className="bg-surface-container-low p-10 rounded-xl border border-outline-variant/20 flex flex-col justify-between hover:shadow-lg transition-all"
+                >
+                  <div>
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="flex text-secondary">
+                        {[...Array(rating)].map((_, i) => (
+                          <span
+                            key={i}
+                            className="material-symbols-outlined text-[20px]"
+                            style={{ fontVariationSettings: '"FILL" 1' }}
+                          >
+                            star
+                          </span>
+                        ))}
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${badgeColor}`}>
+                        {test.source}
+                      </span>
+                    </div>
+                    <p className="font-body-lg italic text-primary leading-relaxed mb-8">
+                      "{test.message}"
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt={test.customerName}
+                        className="w-12 h-12 rounded-full object-cover border border-outline-variant/20"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-primary font-bold">
+                        {test.customerName.charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-bold text-primary">{test.customerName}</p>
+                    </div>
+                  </div>
                 </div>
-                <p className="font-body-lg italic text-primary leading-relaxed mb-8">
-                  "{test.quote}"
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-full ${test.color}`}></div>
-                <div>
-                  <p className="font-bold text-primary">{test.author}</p>
-                  <p className="text-on-surface-variant text-sm">{test.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Instagram Inspiration Section */}
@@ -348,7 +410,7 @@ function Home() {
 
           <div className="flex flex-wrap justify-center gap-6 relative z-10">
             <a
-              href="https://wa.me/919876543210?text=Hello%20Priya,%20I'm%20interested%20in%20customizing%20some%20organizers!"
+              href={`https://wa.me/${(settings?.whatsapp || "919876543210").replace(/[^0-9]/g, '')}?text=${encodeURIComponent("Hello Priya, I'm interested in customizing some organizers!")}`}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-[#25D366] text-white px-10 py-4 rounded-full font-body-lg flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-green-100 font-semibold"

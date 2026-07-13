@@ -1,6 +1,24 @@
 import { Link } from 'react-router-dom';
+import { useSettings } from '../hooks/useSettings';
 
 function About() {
+  const { data: settings, isLoading } = useSettings();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-secondary border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-label-md tracking-wider uppercase text-on-surface-variant text-sm animate-pulse">
+            Loading Atelier...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const aboutHeroImage = settings?.heroImage?.url || "/assets/images/about-1.jpg";
+
   return (
     <main className="mt-20">
 
@@ -9,7 +27,7 @@ function About() {
         <div className="absolute inset-0 z-0 flex justify-end">
           <div
             className="w-full md:w-1/2 h-full bg-cover bg-center"
-            style={{ backgroundImage: 'url("/assets/images/about-1.jpg")' }}
+            style={{ backgroundImage: `url("${aboutHeroImage}")` }}
           ></div>
           <div className="absolute inset-0 hero-overlay hidden md:block"></div>
           <div className="absolute inset-0 bg-surface/60 md:hidden"></div>
@@ -23,7 +41,7 @@ function About() {
             Crafting Timeless Moments
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
-            Where every stitch tells a story of love, heritage, and artisanal mastery.
+            {settings?.aboutText || "Where every stitch tells a story of love, heritage, and artisanal mastery."}
           </p>
         </div>
       </section>

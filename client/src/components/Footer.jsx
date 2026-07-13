@@ -1,11 +1,21 @@
 import { Link } from 'react-router-dom';
+import { useSettings } from '../hooks/useSettings';
 
 function Footer() {
+  const { data: settings } = useSettings();
+  
   const handleSubmitEmail = (e) => {
     e.preventDefault();
     alert('Thank you for subscribing to our atelier updates!');
     e.target.reset();
   };
+
+  const businessName = settings?.businessName || "Lil' Threadz by Priya";
+  const aboutText = settings?.aboutText || "Crafting archival organization solutions with heritage modernist principles. Protecting your treasures with elegance and artisanal care.";
+  const email = settings?.email || "hello@lilthreadz.com";
+  const instagramUrl = settings?.instagram || "https://www.instagram.com/lilthreadz_bypriya/";
+  const whatsappPhone = settings?.whatsapp || "919876543210";
+  const whatsappUrl = `https://wa.me/${whatsappPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent("Hello Priya, I'm interested in customizing a fabric organizer!")}`;
 
   return (
     <footer className="w-full border-t border-outline-variant bg-surface-container-low transition-colors duration-300">
@@ -14,32 +24,37 @@ function Footer() {
         {/* Brand Info */}
         <div className="col-span-1">
           <h3 className="font-headline-lg text-headline-lg text-secondary mb-6 italic font-bold">
-            Lil' Threadz by Priya
+            {businessName}
           </h3>
           <p className="text-on-surface-variant font-body-md mb-8 leading-relaxed">
-            Crafting archival organization solutions with heritage modernist principles. Protecting your treasures with elegance and artisanal care.
+            {aboutText}
           </p>
           <div className="flex gap-4">
             <a
-              href="#"
+              href={instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-10 h-10 rounded-full border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:text-secondary hover:border-secondary transition-colors"
             >
               <span className="material-symbols-outlined text-lg">camera_enhance</span>
             </a>
             <a
-              href="#"
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-10 h-10 rounded-full border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:text-secondary hover:border-secondary transition-colors"
             >
               <span className="material-symbols-outlined text-lg">share</span>
             </a>
             <a
-              href="mailto:hello@lilthreadz.com"
+              href={`mailto:${email}`}
               className="w-10 h-10 rounded-full border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:text-secondary hover:border-secondary transition-colors"
             >
               <span className="material-symbols-outlined text-lg">mail</span>
             </a>
           </div>
         </div>
+
 
         {/* Quick Links */}
         <div>
@@ -110,7 +125,7 @@ function Footer() {
 
       {/* Footer Bottom */}
       <div className="max-w-[1200px] mx-auto px-6 md:px-16 py-8 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center opacity-70">
-        <p className="text-label-md">© 2026 Lil' Threadz by Priya. Crafted with Care.</p>
+        <p className="text-label-md">© {new Date().getFullYear()} {businessName}. Crafted with Care.</p>
         <div className="flex gap-[24px] mt-4 md:mt-0 text-label-md">
           <span>Heritage Modernism Aesthetic</span>
         </div>

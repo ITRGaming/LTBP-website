@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { products } from '../data/products';
+import { useProducts } from '../hooks/useProducts';
+import { useSettings } from '../hooks/useSettings';
+import ImageFallback from '../components/ImageFallback';
 
 function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -26,6 +28,19 @@ function Products() {
       setSearchParams({});
     }
   }, [searchParams]);
+
+  // Load site settings for branding/contact details
+  const { data: settings } = useSettings();
+
+  // Load products from backend with search and category inputs
+  // Note: SelectedCategories is an array, we can join or query individual if API supports.
+  // Our backend getAllProducts supports category filter string. If multiple categories are checked,
+  // we can filter them on the client to preserve multi-select functionality.
+  const { data: productsData, isLoading, error } = useProducts({
+    search: searchQuery,
+  });
+
+  const productsList = productsData?.products || [];
 
   // Categories list
   const categoriesList = [
@@ -66,49 +81,61 @@ function Products() {
     setSelectedColor(null);
   };
 
-  // Filtering Logic
-  const filteredProducts = products.filter(product => {
-    // 1. Search Query filter (matches title and description)
-    const matchesSearch = searchQuery === '' ||
-      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-    // 2. Category filter
+  // Filtering Logic (Client-side category, size and color filtering)
+  const filteredProducts = productsList.filter(product => {
+    // 1. Category filter
     const matchesCategory = selectedCategories.length === 0 ||
       selectedCategories.includes(product.category);
 
-    // 3. Size filter
+    // 2. Size filter
     const matchesSize = selectedSize === null ||
+      product.availableSizes?.includes(selectedSize) ||
       product.size === selectedSize;
 
-    // 4. Color filter
+    // 3. Color filter
+    // We match by hex or color name. In the backend, colors are stored as strings (e.g. Hex or name)
     const matchesColor = selectedColor === null ||
-      product.colors.includes(selectedColor);
+      product.availableColors?.some(c => c.toLowerCase() === selectedColor.toLowerCase()) ||
+      product.availableColors?.includes(selectedColor);
 
-    return matchesSearch && matchesCategory && matchesSize && matchesColor;
+    return matchesCategory && matchesSize && matchesColor;
   });
 
   // Open customization modal
   const openCustomizationModal = (product) => {
     setCustomizingProduct(product);
-    setModalSize(product.size);
-    setModalColor(product.colorsNames ? product.colorsNames[0] : product.colors[0]);
+    setModalSize(product.availableSizes?.[0] || 'Classic');
+    setModalColor(product.availableColors?.[0] || '');
     setModalName('');
   };
 
   // Launch WhatsApp order URL
   const handleWhatsAppOrder = () => {
     if (!customizingProduct) return;
-    const phone = "919876543210"; // Priya's WhatsApp
+    const phone = settings?.whatsapp || "919876543210"; // Priya's WhatsApp
     const message = `Hello Priya! I want to order a customized creation:%0A%0A` +
-      `*Product:* ${customizingProduct.title}%0A` +
+      `*Product:* ${customizingProduct.name}%0A` +
       `*Size Chosen:* ${modalSize}%0A` +
       `*Color Chosen:* ${modalColor}%0A` +
       `*Personalized Name/Monogram:* ${modalName || 'None'}`;
 
-    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${message}`, '_blank');
     setCustomizingProduct(null);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-secondary border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-label-md tracking-wider uppercase text-on-surface-variant text-sm animate-pulse">
+            Loading Atelier...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <main className="pt-32 pb-24 max-w-[1200px] mx-auto px-6 md:px-16">
@@ -259,48 +286,55 @@ function Products() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[24px]">
-              {filteredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="group flex flex-col bg-surface-container-lowest rounded-2xl overflow-hidden product-card-shadow border border-surface-container-high transition-all duration-500 hover:shadow-lg"
-                >
-                  <div className="relative aspect-[4/5] overflow-hidden">
-                    <img
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      alt={product.title}
-                      src={product.image}
-                    />
-                    {product.badge && (
-                      <div className="absolute top-4 right-4">
-                        <span className={`px-3 py-1 rounded-full font-label-md text-[10px] uppercase tracking-widest text-primary ${product.badge === 'New Arrival' ? 'bg-brand-sage' :
-                          product.badge === 'Best Seller' || product.badge === 'Bestseller' ? 'bg-secondary-container' : 'bg-soft-pink'
-                          }`}>
-                          {product.badge}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+              {filteredProducts.map((product) => {
+                const mainImageUrl = product.images?.[0]?.url;
+                return (
+                  <div
+                    key={product._id}
+                    className="group flex flex-col bg-surface-container-lowest rounded-2xl overflow-hidden product-card-shadow border border-surface-container-high transition-all duration-500 hover:shadow-lg"
+                  >
+                    <Link to={`/products/${product.slug}`} className="relative aspect-[4/5] overflow-hidden block">
+                      {mainImageUrl ? (
+                        <img
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          alt={product.name}
+                          src={mainImageUrl}
+                        />
+                      ) : (
+                        <ImageFallback className="w-full h-full" text={product.name} />
+                      )}
+                      {product.isFeatured && (
+                        <div className="absolute top-4 right-4">
+                          <span className="px-3 py-1 rounded-full font-label-md text-[10px] uppercase tracking-widest text-primary bg-secondary-container">
+                            Best Seller
+                          </span>
+                        </div>
+                      )}
+                    </Link>
 
-                  <div className="p-6 flex flex-col flex-grow">
-                    <h3 className="font-headline-md text-headline-md mb-2 font-semibold">{product.title}</h3>
-                    <p className="font-body-md text-on-surface-variant mb-6 line-clamp-2">
-                      {product.description}
-                    </p>
-                    <div className="mt-auto flex items-center justify-between">
-                      <span className="font-headline-md text-primary font-bold">
-                        ${product.price.toFixed(2)}
-                      </span>
-                      <button
-                        onClick={() => openCustomizationModal(product)}
-                        className="flex items-center gap-2 font-label-md text-label-md uppercase tracking-widest text-on-surface-variant group-hover:text-primary transition-colors font-semibold"
-                      >
-                        View Details
-                        <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                      </button>
+                    <div className="p-6 flex flex-col flex-grow">
+                      <Link to={`/products/${product.slug}`} className="hover:underline decoration-secondary">
+                        <h3 className="font-headline-md text-headline-md mb-2 font-semibold text-primary">{product.name}</h3>
+                      </Link>
+                      <p className="font-body-md text-on-surface-variant mb-6 line-clamp-2">
+                        {product.shortDescription || product.description}
+                      </p>
+                      <div className="mt-auto flex items-center justify-between">
+                        <span className="font-headline-md text-primary font-bold">
+                          {product.price ? `$${product.price.toFixed(2)}` : 'Contact for Quote'}
+                        </span>
+                        <button
+                          onClick={() => openCustomizationModal(product)}
+                          className="flex items-center gap-2 font-label-md text-label-md uppercase tracking-widest text-on-surface-variant group-hover:text-primary transition-colors font-semibold"
+                        >
+                          Customize
+                          <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -324,7 +358,7 @@ function Products() {
                   Bespoke Atelier Consultation
                 </span>
                 <h3 className="font-headline-lg text-headline-lg text-primary font-bold leading-tight">
-                  {customizingProduct.title}
+                  {customizingProduct.name}
                 </h3>
               </div>
               <button
@@ -339,20 +373,24 @@ function Products() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
               {/* Product Image */}
               <div className="aspect-[4/5] rounded-xl overflow-hidden shadow-sm">
-                <img
-                  className="w-full h-full object-cover"
-                  src={customizingProduct.image}
-                  alt={customizingProduct.title}
-                />
+                {customizingProduct.images?.[0]?.url ? (
+                  <img
+                    className="w-full h-full object-cover"
+                    src={customizingProduct.images[0].url}
+                    alt={customizingProduct.name}
+                  />
+                ) : (
+                  <ImageFallback className="w-full h-full" text={customizingProduct.name} />
+                )}
               </div>
 
               {/* Form Options */}
               <div className="space-y-5">
-                <p className="font-body-md text-on-surface-variant">
-                  {customizingProduct.description}
+                <p className="font-body-md text-on-surface-variant line-clamp-4">
+                  {customizingProduct.shortDescription || customizingProduct.description}
                 </p>
                 <div className="text-xl font-bold font-headline-md text-primary">
-                  Base Price: ${customizingProduct.price.toFixed(2)}
+                  Base Price: {customizingProduct.price ? `$${customizingProduct.price.toFixed(2)}` : 'Quote Needed'}
                 </div>
 
                 {/* 1. Size Choice */}
@@ -360,8 +398,11 @@ function Products() {
                   <h4 className="font-label-md tracking-wider uppercase text-on-surface-variant text-xs mb-2 font-semibold">
                     1. Choose Size
                   </h4>
-                  <div className="flex gap-2">
-                    {sizesList.map((size) => (
+                  <div className="flex flex-wrap gap-2">
+                    {(customizingProduct.availableSizes && customizingProduct.availableSizes.length > 0
+                      ? customizingProduct.availableSizes
+                      : sizesList
+                    ).map((size) => (
                       <button
                         key={size}
                         className={`px-3 py-1.5 border rounded-lg font-label-md text-xs font-semibold ${modalSize === size
@@ -382,21 +423,27 @@ function Products() {
                     2. Choose Color
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    {customizingProduct.colors.map((color, idx) => {
-                      const colorName = customizingProduct.colorsNames
-                        ? customizingProduct.colorsNames[idx]
-                        : color;
+                    {(customizingProduct.availableColors && customizingProduct.availableColors.length > 0
+                      ? customizingProduct.availableColors
+                      : colorsList.map(c => c.hex)
+                    ).map((color, idx) => {
                       return (
                         <button
                           key={color}
-                          className={`w-7 h-7 rounded-full border border-black/5 ${modalColor === colorName
+                          className={`w-7 h-7 rounded-full border border-black/5 ${modalColor === color
                             ? 'ring-2 ring-offset-1 ring-secondary scale-105'
                             : ''
                             }`}
-                          style={{ backgroundColor: color }}
-                          title={colorName}
-                          onClick={() => setModalColor(colorName)}
-                        ></button>
+                          style={{ backgroundColor: color.startsWith('#') ? color : undefined }}
+                          title={color}
+                          onClick={() => setModalColor(color)}
+                        >
+                          {!color.startsWith('#') && (
+                            <span className="text-[10px] text-primary truncate max-w-full block px-0.5">
+                              {color.substring(0, 3)}
+                            </span>
+                          )}
+                        </button>
                       );
                     })}
                   </div>

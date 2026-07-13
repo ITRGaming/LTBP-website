@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
+import { useSettings } from '../hooks/useSettings';
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { data: settings } = useSettings();
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -12,6 +14,12 @@ function Header() {
     { name: 'Testimonials', path: '/testimonials' },
     { name: 'Contact Us', path: '/contact' }
   ];
+
+  const businessName = settings?.businessName || "Lil' Threadz by Priya";
+  const logoUrl = settings?.logo?.url || "/assets/images/logo.png";
+  const instagramUrl = settings?.instagram || "https://www.instagram.com/lilthreadz_bypriya/";
+  const whatsappPhone = settings?.whatsapp || "919876543210";
+  const whatsappUrl = `https://wa.me/${whatsappPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent("Hello Priya, I'm interested in customizing a fabric organizer!")}`;
 
   return (
     <>
@@ -31,12 +39,12 @@ function Header() {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
               <img
-                src="/assets/images/logo.png"
-                alt="Lil' Threadz by Priya"
+                src={logoUrl}
+                alt={businessName}
                 className="h-12 w-12 object-contain rounded-full border border-outline-variant/20"
               />
               <span className="font-headline-md text-primary hidden sm:block italic font-bold">
-                Lil' Threadz by Priya
+                {businessName}
               </span>
             </Link>
           </div>
@@ -58,7 +66,7 @@ function Header() {
               </NavLink>
             ))}
             <a
-              href="https://www.instagram.com/lilthreadz_bypriya/"
+              href={instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="font-label-md text-label-md tracking-widest uppercase text-on-surface-variant hover:text-primary transition-all duration-300 hover:opacity-70"
@@ -77,7 +85,7 @@ function Header() {
               shopping_bag
             </button>
             <a
-              href="https://wa.me/919876543210?text=Hello%20Priya,%20I'm%20interested%20in%20customizing%20a%20fabric%20organizer!"
+              href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-[#25D366] text-white px-5 py-2.5 rounded-full font-body-md flex items-center gap-2 transition-all duration-200 active:scale-95 hover:brightness-110 shadow-sm"
@@ -91,6 +99,7 @@ function Header() {
         </div>
       </header>
 
+
       {/* Mobile Drawer Navigation Menu */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-50 flex">
@@ -103,7 +112,7 @@ function Header() {
           {/* Drawer content */}
           <div className="relative w-80 max-w-[85%] bg-surface h-full shadow-2xl p-6 flex flex-col z-10 animate-in slide-in-from-left duration-300">
             <div className="flex justify-between items-center mb-8">
-              <span className="font-headline-md text-primary italic font-bold">Lil' Threadz</span>
+              <span className="font-headline-md text-primary italic font-bold">{businessName}</span>
               <button
                 className="material-symbols-outlined text-on-surface-variant hover:text-primary flex items-center justify-center p-2 rounded-full hover:bg-surface-container-low"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -129,7 +138,7 @@ function Header() {
                 </NavLink>
               ))}
               <a
-                href="https://instagram.com"
+                href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-label-md text-lg tracking-widest uppercase text-on-surface-variant hover:text-primary"
@@ -141,7 +150,7 @@ function Header() {
 
             <div className="mt-auto pt-6 border-t border-outline-variant/30 flex flex-col gap-4">
               <a
-                href="https://wa.me/919876543210"
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-[#25D366] text-white py-3 rounded-full font-body-md flex items-center justify-center gap-2 hover:brightness-105 active:scale-95 transition-all"

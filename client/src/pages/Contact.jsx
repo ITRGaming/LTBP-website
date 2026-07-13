@@ -1,13 +1,22 @@
 import React, { useState } from 'react';
+import { useContact } from '../hooks/useContact';
+import { useSettings } from '../hooks/useSettings';
 
 export default function Contact() {
+    const { data: settings } = useSettings();
+    const contactMutation = useContact();
+
     // Form State handling controlled inputs
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
+        phone: '',
         inquiryType: 'Bespoke Commission',
         message: ''
     });
+
+    const [submitSuccess, setSubmitSuccess] = useState(false);
+    const [submitError, setSubmitError] = useState('');
 
     // Accordion Multi-Toggle State tracking active key indices
     const [activeFaq, setActiveFaq] = useState(null);
@@ -23,8 +32,33 @@ export default function Contact() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Form Submitted Safely:', formData);
-        alert('Thank you for your inquiry! We will get back to you shortly.');
+        setSubmitSuccess(false);
+        setSubmitError('');
+
+        // Prepare payload mapping
+        const payload = {
+            name: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            message: `[Inquiry: ${formData.inquiryType}] ${formData.message}`
+        };
+
+        contactMutation.mutate(payload, {
+            onSuccess: () => {
+                setSubmitSuccess(true);
+                setFormData({
+                    fullName: '',
+                    email: '',
+                    phone: '',
+                    inquiryType: 'Bespoke Commission',
+                    message: ''
+                });
+            },
+            onError: (err) => {
+                const errMsg = err.response?.data?.message || 'Failed to submit inquiry. Please try again.';
+                setSubmitError(errMsg);
+            }
+        });
     };
 
     // Static Configuration Array matching the DOM text contents
@@ -102,24 +136,43 @@ export default function Contact() {
                             </div>
                         </div>
 
-                        {/* Inquiry Type Dropdown Select wrapper */}
-                        <div className="space-y-2 relative">
-                            <label className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant block">
-                                Inquiry Type
-                            </label>
-                            <select
-                                name="inquiryType"
-                                value={formData.inquiryType}
-                                onChange={handleChange}
-                                className="w-full bg-transparent border-b border-outline-variant focus:border-brand-lavender focus:ring-0 py-3 transition-colors text-on-surface focus:outline-none appearance-none cursor-pointer"
-                            >
-                                <option value="Bespoke Commission">Bespoke Commission</option>
-                                <option value="Order Status">Order Status</option>
-                                <option value="Press &amp; Collaboration">Press &amp; Collaboration</option>
-                                <option value="General Question">General Question</option>
-                            </select>
-                            <div className="absolute right-2 bottom-4 pointer-events-none text-on-surface-variant text-xs">
-                                ▼
+                        {/* Input Row 2 Grid Container */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Phone Number */}
+                            <div className="space-y-2">
+                                <label className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant block">
+                                    Phone Number
+                                </label>
+                                <input
+                                    type="tel"
+                                    name="phone"
+                                    value={formData.phone}
+                                    onChange={handleChange}
+                                    placeholder="+91 98765 43210"
+                                    required
+                                    className="w-full bg-transparent border-b border-outline-variant focus:border-brand-lavender focus:ring-0 py-3 transition-colors placeholder:text-outline-variant focus:outline-none text-on-surface"
+                                />
+                            </div>
+
+                            {/* Inquiry Type Dropdown Select wrapper */}
+                            <div className="space-y-2 relative">
+                                <label className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant block">
+                                    Inquiry Type
+                                </label>
+                                <select
+                                    name="inquiryType"
+                                    value={formData.inquiryType}
+                                    onChange={handleChange}
+                                    className="w-full bg-transparent border-b border-outline-variant focus:border-brand-lavender focus:ring-0 py-3 transition-colors text-on-surface focus:outline-none appearance-none cursor-pointer"
+                                >
+                                    <option value="Bespoke Commission">Bespoke Commission</option>
+                                    <option value="Order Status">Order Status</option>
+                                    <option value="Press &amp; Collaboration">Press &amp; Collaboration</option>
+                                    <option value="General Question">General Question</option>
+                                </select>
+                                <div className="absolute right-2 bottom-4 pointer-events-none text-on-surface-variant text-xs">
+                                    ▼
+                                </div>
                             </div>
                         </div>
 
@@ -139,12 +192,32 @@ export default function Contact() {
                             />
                         </div>
 
+                        {submitSuccess && (
+                            <div className="bg-green-100/50 border border-green-600/30 text-green-600 p-4 rounded-xl text-sm font-medium">
+                                Thank you for your inquiry! We will get back to you shortly.
+                            </div>
+                        )}
+
+                        {submitError && (
+                            <div className="bg-red-100/50 border border-red-600/30 text-red-600 p-4 rounded-xl text-sm font-medium">
+                                {submitError}
+                            </div>
+                        )}
+
                         {/* Form Execution Action Button */}
                         <button
                             type="submit"
-                            className="w-full bg-brand-lavender text-primary font-label-md uppercase tracking-widest py-5 rounded-full hover:brightness-105 transition-all shadow-sm font-medium"
+                            disabled={contactMutation.isPending}
+                            className="w-full bg-brand-lavender text-primary font-label-md uppercase tracking-widest py-5 rounded-full hover:brightness-105 transition-all shadow-sm font-medium disabled:opacity-50 flex items-center justify-center gap-3"
                         >
-                            Send Inquiry
+                            {contactMutation.isPending ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                    Sending...
+                                </>
+                            ) : (
+                                'Send Inquiry'
+                            )}
                         </button>
                     </form>
                 </div>

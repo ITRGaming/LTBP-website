@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useSettings } from '../hooks/useSettings';
+import { resolveImageUrl } from '../utils/imageUrl';
 
 function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -16,7 +17,7 @@ function Header() {
   ];
 
   const businessName = settings?.businessName || "Lil' Threadz by Priya";
-  const logoUrl = settings?.logo?.url || "/assets/images/logo.png";
+  const logoUrl = resolveImageUrl(settings?.logo?.url) || "/assets/images/logo.png";
   const instagramUrl = settings?.instagram || "https://www.instagram.com/lilthreadz_bypriya/";
   const whatsappPhone = settings?.whatsapp || "919876543210";
   const whatsappUrl = `https://wa.me/${whatsappPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent("Hello Priya, I'm interested in customizing a fabric organizer!")}`;

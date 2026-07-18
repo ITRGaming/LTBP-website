@@ -1,4 +1,4 @@
-import { loginAdmin, resetAdminPassword } from '../services/authService.js';
+import { loginAdmin, resetAdminPassword, changeAdminPassword } from '../services/authService.js';
 import ApiResponse from '../utils/apiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
@@ -25,4 +25,10 @@ export const resetPassword = asyncHandler(async (req, res) => {
   await resetAdminPassword(email, newPassword, token, recoverySecret);
   
   new ApiResponse(200, null, 'Password reset successful. Please login with your new password.').send(res);
+});
+
+export const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  await changeAdminPassword(req.admin._id, currentPassword, newPassword);
+  new ApiResponse(200, null, 'Password changed successfully.').send(res);
 });

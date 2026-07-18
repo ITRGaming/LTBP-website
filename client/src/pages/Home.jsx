@@ -3,6 +3,7 @@ import { useSettings } from '../hooks/useSettings';
 import { useFeaturedProducts } from '../hooks/useProducts';
 import { useTestimonials } from '../hooks/useTestimonials';
 import ImageFallback from '../components/ImageFallback';
+import { resolveImageUrl } from '../utils/imageUrl';
 
 function Home() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ function Home() {
   // Filter or take first 3 testimonials
   const homeTestimonials = testimonials?.slice(0, 3) || [];
 
-  const heroImage = settings?.heroImage?.url || "/assets/images/hero.jpg";
+  const heroImage = resolveImageUrl(settings?.heroImage?.url) || "/assets/images/hero.jpg";
   const businessName = settings?.businessName || "Lil' Threadz by Priya";
 
   return (
@@ -195,7 +196,7 @@ function Home() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px]">
             {displayProducts.map((product) => {
-              const mainImageUrl = product.images?.[0]?.url;
+              const mainImageUrl = resolveImageUrl(product.images?.[0]?.url);
               return (
                 <Link to={`/products/${product.slug}`} key={product._id} className="flex flex-col group cursor-pointer">
                   <div className="aspect-square bg-surface-container rounded-xl overflow-hidden mb-6 relative">

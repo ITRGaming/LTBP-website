@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
 import { useSettings } from '../hooks/useSettings';
 import ImageFallback from '../components/ImageFallback';
+import { resolveImageUrl } from '../utils/imageUrl';
 
 function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -287,7 +288,7 @@ function Products() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[24px]">
               {filteredProducts.map((product) => {
-                const mainImageUrl = product.images?.[0]?.url;
+                const mainImageUrl = resolveImageUrl(product.images?.[0]?.url);
                 return (
                   <div
                     key={product._id}
@@ -376,7 +377,7 @@ function Products() {
                 {customizingProduct.images?.[0]?.url ? (
                   <img
                     className="w-full h-full object-cover"
-                    src={customizingProduct.images[0].url}
+                    src={resolveImageUrl(customizingProduct.images[0].url)}
                     alt={customizingProduct.name}
                   />
                 ) : (

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTestimonials } from '../hooks/useTestimonials';
+import { resolveImageUrl } from '../utils/imageUrl';
 
 export default function Testimonials() {
   const { data: testimonials, isLoading, error } = useTestimonials();
@@ -56,7 +57,7 @@ export default function Testimonials() {
               'Text': 'bg-surface-container-high text-on-surface-variant'
             };
             const badgeColor = sourceColors[test.source] || 'bg-surface-container-high';
-            const avatarUrl = test.image?.url;
+            const avatarUrl = resolveImageUrl(test.image?.url);
 
             return (
               <div

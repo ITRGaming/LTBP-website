@@ -91,3 +91,14 @@ export const resetAdminPassword = async (email, newPassword, token, recoverySecr
   await admin.save();
   return true;
 };
+
+export const changeAdminPassword = async (adminId, currentPassword, newPassword) => {
+  const admin = await Admin.findById(adminId).select('+password');
+  if (!admin || !(await admin.matchPassword(currentPassword))) {
+    throw new ApiError(401, 'Current password is incorrect.');
+  }
+
+  admin.password = newPassword;
+  await admin.save();
+  return true;
+};

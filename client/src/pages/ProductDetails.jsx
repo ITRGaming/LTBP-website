@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useProductDetails } from '../hooks/useProductDetails';
 import { useSettings } from '../hooks/useSettings';
 import ImageFallback from '../components/ImageFallback';
+import { resolveImageUrl } from '../utils/imageUrl';
 
 export default function ProductDetails() {
   const { slug } = useParams();
@@ -52,7 +53,7 @@ export default function ProductDetails() {
   // Default color and size options if not defined
   const sizes = product.availableSizes || [];
   const colors = product.availableColors || [];
-  const mainImage = product.images?.[activeImageIndex]?.url;
+  const mainImage = resolveImageUrl(product.images?.[activeImageIndex]?.url);
 
   // Initialize selected values if empty
   if (!selectedSize && sizes.length > 0) setSelectedSize(sizes[0]);
@@ -105,7 +106,7 @@ export default function ProductDetails() {
                     activeImageIndex === index ? 'border-secondary scale-95 shadow-sm' : 'border-transparent opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <img src={img.url} alt="" className="w-full h-full object-cover" />
+                  <img src={resolveImageUrl(img.url)} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>

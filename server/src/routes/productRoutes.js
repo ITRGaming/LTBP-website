@@ -10,6 +10,8 @@ const router = express.Router();
 router.get('/', productController.getProducts);
 router.get('/featured', productController.getFeaturedProducts);
 router.get('/category/:categoryName', productController.getProductsByCategory);
+// Admin list includes inactive products; it must be declared before /:slug.
+router.get('/admin', protect, productController.getProducts);
 router.get('/:slug', productController.getProductBySlug);
 
 // Admin-only protected routes

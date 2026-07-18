@@ -43,13 +43,13 @@ const seedDatabase = async () => {
     // 3. Seed Website Settings
     console.log('Initializing global settings...');
     const defaultSettings = new Settings({
-      businessName: 'Luxe Craft Showcase',
-      phone: '+1 (555) 019-2834',
-      whatsapp: '+1 (555) 019-9988',
-      email: 'hello@luxecraft.com',
-      instagram: 'https://instagram.com/luxecraft_showcase',
-      address: '742 Amberwood Lane, Design District, NY 10001',
-      aboutText: 'Luxe Craft Showcase represents the pinnacle of handcrafted products. Our boutique portfolio highlights products engineered with premium materials, built for durability, and customized for the discerning consumer. Explore our collection and connect with our team directly.',
+      businessName: 'Lil Threadz By Priya',
+      phone: '+919754142252',
+      whatsapp: '+919754142252',
+      email: 'priya@luxecraft.com',
+      instagram: 'https://instagram.com/lilthreadz_bypriya',
+      address: 'Indore, Madhya Pradesh',
+      aboutText: 'Lil Threadz By Priya represents the pinnacle of handcrafted products. Our boutique portfolio highlights products engineered with premium materials, built for durability, and customized for the discerning consumer. Explore our collection and connect with our team directly.',
       logo: {
         url: '/uploads/default-logo.png',
         public_id: 'local_logo'

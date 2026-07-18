@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useSettings } from '../hooks/useSettings';
+import { resolveImageUrl } from '../utils/imageUrl';
 
 function About() {
   const { data: settings, isLoading } = useSettings();
@@ -17,7 +18,7 @@ function About() {
     );
   }
 
-  const aboutHeroImage = settings?.heroImage?.url || "/assets/images/about-1.jpg";
+  const aboutHeroImage = resolveImageUrl(settings?.heroImage?.url) || "/assets/images/about-1.jpg";
 
   return (
     <main className="mt-20">
